@@ -126,7 +126,9 @@
     "@babel/core": "^7.11.5",
     "@storybook/angular": "6.2.0-alpha.19",
     "@storybook/vue": "6.2.0-alpha.19",
+    "@storybook/ember": "6.2.0-alpha.19",
     "babel-loader": "^8.0.0",
+    "ember-source": "^3.16.0",
     "react": "^16.8.0 || ^17.0.0",
     "react-dom": "^16.8.0 || ^17.0.0",
     "sveltedoc-parser": "^3.0.4",
@@ -138,6 +140,12 @@
       "optional": true
     },
     "@storybook/vue": {
+      "optional": true
+    },
+    "@storybook/ember": {
+      "optional": true
+    },
+    "ember-source": {
       "optional": true
     },
     "react": {

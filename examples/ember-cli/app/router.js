@@ -7,6 +7,9 @@ const Router = EmberRouter.extend({
   rootURL: config.rootURL,
 });
 
-Router.map(() => ({}));
+Router.map(function() {
+  this.mount('routable')
+  this.mount('async');
+});
 
 export default Router;

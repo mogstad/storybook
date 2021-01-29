@@ -1,66 +1,20 @@
-import { window, document } from 'global';
 import dedent from 'ts-dedent';
-import { RenderContext, ElementArgs, OptionsArgs } from './types';
+import { RenderContext, OptionsArgs } from './types';
+import { normalizeStoryDeclaration, renderStory } from './-private/render';
 
-declare let Ember: any;
+let currentStoryController: any | null = null;
 
-const rootEl = document.getElementById('root');
+export default async function renderMain({
+  storyFn,
+  kind,
+  name,
+  showMain,
+  showError,
+  forceRender,
+}: RenderContext) {
+  const storyDeclaration: OptionsArgs = storyFn();
 
-const config = window.require(`${window.STORYBOOK_NAME}/config/environment`);
-const app = window.require(`${window.STORYBOOK_NAME}/app`).default.create({
-  autoboot: false,
-  rootElement: rootEl,
-  ...config.APP,
-});
-
-let lastPromise = app.boot();
-let hasRendered = false;
-let isRendering = false;
-
-function render(options: OptionsArgs, el: ElementArgs) {
-  if (isRendering) return;
-  isRendering = true;
-
-  const { template, context = {}, element } = options;
-
-  if (hasRendered) {
-    lastPromise = lastPromise.then((instance: any) => instance.destroy());
-  }
-
-  lastPromise = lastPromise
-    .then(() => {
-      const appInstancePrivate = app.buildInstance();
-      return appInstancePrivate.boot().then(() => appInstancePrivate);
-    })
-    .then((instance: any) => {
-      instance.register(
-        'component:story-mode',
-        Ember.Component.extend({
-          layout: template || options,
-          ...context,
-        })
-      );
-
-      const component = instance.lookup('component:story-mode');
-
-      if (element) {
-        component.appendTo(element);
-
-        element.appendTo(el);
-      } else {
-        component.appendTo(el);
-      }
-      hasRendered = true;
-      isRendering = false;
-
-      return instance;
-    });
-}
-
-export default function renderMain({ storyFn, kind, name, showMain, showError }: RenderContext) {
-  const element = storyFn();
-
-  if (!element) {
+  if (!storyDeclaration) {
     showError({
       title: `Expecting a Ember element from the story: "${name}" of "${kind}".`,
       description: dedent`
@@ -74,5 +28,12 @@ export default function renderMain({ storyFn, kind, name, showMain, showError }:
   }
 
   showMain();
-  render(element, rootEl);
+
+  const normalizedStoryDeclaration = normalizeStoryDeclaration(storyDeclaration);
+  if (!currentStoryController || !forceRender) {
+    const { controller } = await renderStory(normalizedStoryDeclaration);
+    currentStoryController = controller;
+  } else if (normalizedStoryDeclaration.context) {
+    currentStoryController.setProperties(normalizedStoryDeclaration.context);
+  }
 }

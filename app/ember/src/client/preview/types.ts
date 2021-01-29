@@ -9,8 +9,13 @@ export interface ElementArgs {
   el: HTMLElement;
 }
 
-export interface OptionsArgs {
-  template: any;
-  context: any;
-  element: any;
-}
+export type OptionsArgs = Template | StoryDeclaration;
+
+export type Template = () => void;
+export type StoryDeclaration = {
+  template: Template;
+  engine?: string;
+  context?: {
+    [key: string]: any;
+  };
+};

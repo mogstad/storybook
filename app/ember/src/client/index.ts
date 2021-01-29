@@ -9,6 +9,8 @@ export {
   raw,
 } from './preview';
 
+export { renderStory, normalizeStoryDeclaration } from './preview/-private/render';
+
 if (module && module.hot && module.hot.decline) {
   module.hot.decline();
 }
